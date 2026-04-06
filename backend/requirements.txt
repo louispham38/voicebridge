@@ -1,15 +1,17 @@
 fastapi>=0.110.0
 uvicorn[standard]>=0.29.0
 websockets>=12.0
-faster-whisper>=1.0.0
 deep-translator>=1.11.4
 edge-tts>=6.1.0
-numpy>=1.24.0
-soundfile>=0.12.0
 httpx>=0.27.0
 
-# Optional: Voice cloning (requires ~2GB VRAM or CPU fallback)
-# Uncomment below to enable XTTS v2 voice cloning
+# Local STT (heavy, optional for cloud deploy)
+# Uncomment if server has >=2GB RAM:
+# faster-whisper>=1.0.0
+# numpy>=1.24.0
+# soundfile>=0.12.0
+
+# Voice cloning (requires ~4GB RAM)
 # TTS>=0.22.0
 # torch>=2.0.0
 # torchaudio>=2.0.0

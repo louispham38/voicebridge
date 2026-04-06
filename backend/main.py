@@ -78,8 +78,12 @@ _httpx = None
 def _numpy():
     global _np
     if _np is None:
-        import numpy
-        _np = numpy
+        try:
+            import numpy
+            _np = numpy
+        except ImportError:
+            print("[VoiceBridge] numpy not installed – local STT disabled")
+            return None
     return _np
 
 
@@ -94,12 +98,16 @@ def _get_httpx():
 def get_whisper():
     global _whisper, _whisper_mod
     if _whisper is None:
-        if _whisper_mod is None:
-            from faster_whisper import WhisperModel
-            _whisper_mod = WhisperModel
-        print(f"[VoiceBridge] Loading Whisper model '{WHISPER_MODEL_SIZE}' on {WHISPER_DEVICE} …")
-        _whisper = _whisper_mod(WHISPER_MODEL_SIZE, device=WHISPER_DEVICE, compute_type=WHISPER_COMPUTE)
-        print("[VoiceBridge] Whisper ready.")
+        try:
+            if _whisper_mod is None:
+                from faster_whisper import WhisperModel
+                _whisper_mod = WhisperModel
+            print(f"[VoiceBridge] Loading Whisper model '{WHISPER_MODEL_SIZE}' on {WHISPER_DEVICE} …")
+            _whisper = _whisper_mod(WHISPER_MODEL_SIZE, device=WHISPER_DEVICE, compute_type=WHISPER_COMPUTE)
+            print("[VoiceBridge] Whisper ready.")
+        except ImportError:
+            print("[VoiceBridge] faster-whisper not installed – use OpenAI STT instead")
+            return None
     return _whisper
 
 
@@ -174,6 +182,17 @@ class AudioBuffer:
     def add_chunk(self, pcm_bytes: bytes) -> Optional[bytes]:
         self.buffer.extend(pcm_bytes)
         np = _numpy()
+        if np is None:
+            self.has_speech = True
+            self.silence_frames += len(pcm_bytes) // 2
+            silence_needed = int(SILENCE_DURATION * SAMPLE_RATE)
+            if self.silence_frames >= silence_needed:
+                return self._flush()
+            max_bytes = SAMPLE_RATE * MAX_UTTERANCE_SEC * 2
+            if len(self.buffer) > max_bytes:
+                return self._flush()
+            return None
+
         samples = np.frombuffer(pcm_bytes, dtype=np.int16)
         if len(samples) == 0:
             return None
@@ -238,6 +257,8 @@ class SessionConfig:
 async def transcribe_local(pcm_bytes: bytes) -> str:
     model = get_whisper()
     np = _numpy()
+    if model is None or np is None:
+        return "[Error: Local Whisper not available on this server – switch STT to OpenAI]"
     audio = np.frombuffer(pcm_bytes, dtype=np.int16).astype(np.float32) / 32768.0
     if len(audio) < SAMPLE_RATE * 0.3:
         return ""
@@ -250,9 +271,7 @@ async def transcribe_local(pcm_bytes: bytes) -> str:
 async def transcribe_openai(pcm_bytes: bytes, api_key: str) -> str:
     if not api_key:
         return "[Error: OpenAI API key not set]"
-    np = _numpy()
-    audio = np.frombuffer(pcm_bytes, dtype=np.int16)
-    if len(audio) < SAMPLE_RATE * 0.3:
+    if len(pcm_bytes) < int(SAMPLE_RATE * 0.3) * 2:
         return ""
 
     wav_bytes = _pcm_to_wav_bytes(pcm_bytes)
