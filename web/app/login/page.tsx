@@ -1,6 +1,8 @@
 "use client";
 
-import { useState } from "react";
+export const dynamic = "force-dynamic";
+
+import { useState, useMemo } from "react";
 import Link from "next/link";
 import { createClient } from "@/lib/supabase-browser";
 
@@ -8,7 +10,7 @@ export default function LoginPage() {
   const [email, setEmail] = useState("");
   const [loading, setLoading] = useState(false);
   const [message, setMessage] = useState("");
-  const supabase = createClient();
+  const supabase = useMemo(() => createClient(), []);
 
   async function handleEmailLogin(e: React.FormEvent) {
     e.preventDefault();
