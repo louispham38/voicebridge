@@ -1,0 +1,33 @@
+# Python
+__pycache__/
+*.py[cod]
+*.so
+backend/venv/
+backend/voices/
+backend/corrections.json
+*.egg-info/
+
+# Node
+node_modules/
+web/.next/
+web/out/
+
+# Environment & secrets
+.env
+.env.local
+.env.*.local
+*.env
+
+# OS
+.DS_Store
+Thumbs.db
+
+# IDE
+.vscode/
+.idea/
+
+# Build artifacts
+web/public/release/*.zip
+*.zip
+dist/
+build/

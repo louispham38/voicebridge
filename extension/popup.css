@@ -1,0 +1,696 @@
+/* ── VoiceBridge Popup Styles ─────────────────────────────────────────── */
+
+:root {
+  --bg: #0f1117;
+  --surface: #1a1d27;
+  --surface2: #242836;
+  --border: #2e3348;
+  --text: #e4e6f0;
+  --text2: #8b90a5;
+  --accent: #6c5ce7;
+  --accent-light: #a29bfe;
+  --green: #00b894;
+  --red: #e17055;
+  --orange: #fdcb6e;
+  --radius: 10px;
+}
+
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+body {
+  width: 400px;
+  min-height: 480px;
+  background: var(--bg);
+  color: var(--text);
+  font-family: "Segoe UI", system-ui, -apple-system, sans-serif;
+  font-size: 13px;
+  line-height: 1.5;
+}
+
+.app {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+}
+
+/* ── Header ──────────────────────────────────────────────────────────── */
+
+.header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 14px 16px 10px;
+  border-bottom: 1px solid var(--border);
+}
+
+.logo {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  color: var(--accent-light);
+}
+
+.logo h1 {
+  font-size: 16px;
+  font-weight: 700;
+  letter-spacing: -0.3px;
+}
+
+.badge {
+  font-size: 11px;
+  font-weight: 600;
+  padding: 3px 10px;
+  border-radius: 20px;
+  background: var(--surface2);
+  color: var(--text2);
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.badge.connected {
+  background: rgba(0, 184, 148, 0.15);
+  color: var(--green);
+}
+
+.badge.capturing {
+  background: rgba(108, 92, 231, 0.18);
+  color: var(--accent-light);
+  animation: pulse 1.5s infinite;
+}
+
+@keyframes pulse {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.6; }
+}
+
+/* ── Tabs ─────────────────────────────────────────────────────────────── */
+
+.tabs {
+  display: flex;
+  gap: 2px;
+  padding: 8px 16px 0;
+  border-bottom: 1px solid var(--border);
+}
+
+.tab {
+  flex: 1;
+  padding: 8px 0;
+  border: none;
+  background: transparent;
+  color: var(--text2);
+  font-size: 13px;
+  font-weight: 500;
+  cursor: pointer;
+  border-bottom: 2px solid transparent;
+  transition: all 0.2s;
+}
+
+.tab:hover {
+  color: var(--text);
+}
+
+.tab.active {
+  color: var(--accent-light);
+  border-bottom-color: var(--accent);
+}
+
+/* ── Panels ───────────────────────────────────────────────────────────── */
+
+.panel {
+  padding: 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  overflow-y: auto;
+  max-height: 420px;
+}
+
+.panel.hidden {
+  display: none;
+}
+
+/* ── Main button ──────────────────────────────────────────────────────── */
+
+.btn-main {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  padding: 14px;
+  border: none;
+  border-radius: var(--radius);
+  background: linear-gradient(135deg, var(--accent), #8b5cf6);
+  color: #fff;
+  font-size: 15px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.25s;
+  box-shadow: 0 4px 20px rgba(108, 92, 231, 0.3);
+}
+
+.btn-main:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 6px 24px rgba(108, 92, 231, 0.45);
+}
+
+.btn-main.active {
+  background: linear-gradient(135deg, var(--red), #e74c3c);
+  box-shadow: 0 4px 20px rgba(225, 112, 85, 0.3);
+}
+
+.btn-main.active:hover {
+  box-shadow: 0 6px 24px rgba(225, 112, 85, 0.45);
+}
+
+/* ── Controls ─────────────────────────────────────────────────────────── */
+
+.control-row {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 8px 12px;
+  background: var(--surface);
+  border-radius: var(--radius);
+}
+
+.control-row label {
+  font-size: 12px;
+  color: var(--text2);
+  white-space: nowrap;
+}
+
+.control-row input[type="range"] {
+  flex: 1;
+  accent-color: var(--accent);
+  height: 4px;
+}
+
+.control-row span {
+  font-size: 12px;
+  color: var(--text2);
+  min-width: 32px;
+  text-align: right;
+}
+
+/* ── Live transcript area ─────────────────────────────────────────────── */
+
+.live-area {
+  display: flex;
+  gap: 10px;
+  padding: 10px 12px;
+  background: var(--surface);
+  border-radius: var(--radius);
+  min-height: 44px;
+  align-items: flex-start;
+  border: 1px solid var(--border);
+}
+
+.live-area.accent {
+  border-color: rgba(108, 92, 231, 0.3);
+  background: rgba(108, 92, 231, 0.06);
+}
+
+.live-label {
+  font-size: 10px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.8px;
+  color: var(--text2);
+  padding: 3px 6px;
+  background: var(--surface2);
+  border-radius: 4px;
+  flex-shrink: 0;
+}
+
+.live-area.accent .live-label {
+  background: rgba(108, 92, 231, 0.2);
+  color: var(--accent-light);
+}
+
+.live-text {
+  font-size: 13px;
+  line-height: 1.5;
+  color: var(--text);
+  word-break: break-word;
+}
+
+.live-area:not(.accent) .live-text {
+  color: var(--text2);
+}
+
+.live-area.accent .live-text {
+  font-weight: 500;
+  font-size: 14px;
+}
+
+/* ── Meta ─────────────────────────────────────────────────────────────── */
+
+.meta {
+  font-size: 11px;
+  color: var(--text2);
+  text-align: center;
+}
+
+/* ── Voice training ───────────────────────────────────────────────────── */
+
+.help-text {
+  font-size: 12px;
+  color: var(--text2);
+  line-height: 1.6;
+  padding: 10px 12px;
+  background: var(--surface);
+  border-radius: var(--radius);
+  border-left: 3px solid var(--accent);
+}
+
+.field {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.field label {
+  font-size: 12px;
+  font-weight: 500;
+  color: var(--text2);
+}
+
+.field input[type="text"],
+.field select {
+  padding: 8px 12px;
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  background: var(--surface);
+  color: var(--text);
+  font-size: 13px;
+  outline: none;
+  transition: border-color 0.2s;
+}
+
+.field input[type="text"]:focus,
+.field select:focus {
+  border-color: var(--accent);
+}
+
+.field input[type="file"] {
+  font-size: 12px;
+  color: var(--text2);
+}
+
+.input-row {
+  display: flex;
+  gap: 8px;
+}
+
+.input-row input {
+  flex: 1;
+}
+
+.btn-sm {
+  padding: 7px 14px;
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  background: var(--surface2);
+  color: var(--text);
+  font-size: 12px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.btn-sm:hover {
+  background: var(--accent);
+  border-color: var(--accent);
+  color: #fff;
+}
+
+.record-section {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.btn-record {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 10px 18px;
+  border: none;
+  border-radius: 24px;
+  background: var(--surface2);
+  color: var(--text);
+  font-size: 13px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.btn-record:hover {
+  background: var(--red);
+  color: #fff;
+}
+
+.btn-record.recording {
+  background: var(--red);
+  color: #fff;
+  animation: pulse 1s infinite;
+}
+
+.rec-dot {
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  background: var(--red);
+}
+
+.btn-record.recording .rec-dot {
+  background: #fff;
+}
+
+.rec-timer {
+  font-size: 13px;
+  font-variant-numeric: tabular-nums;
+  color: var(--text2);
+}
+
+.sub-heading {
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--text2);
+  margin-top: 4px;
+}
+
+.samples-list,
+.profiles-list {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.sample-item,
+.profile-item {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 8px 12px;
+  background: var(--surface);
+  border-radius: 8px;
+  font-size: 12px;
+}
+
+.sample-item span,
+.profile-item span {
+  color: var(--text);
+}
+
+.profile-item .pcount {
+  font-size: 11px;
+  color: var(--text2);
+}
+
+.btn-icon {
+  background: none;
+  border: none;
+  color: var(--text2);
+  cursor: pointer;
+  padding: 4px;
+  font-size: 14px;
+  transition: color 0.2s;
+}
+
+.btn-icon:hover {
+  color: var(--red);
+}
+
+.btn-icon.use:hover {
+  color: var(--green);
+}
+
+.field-error {
+  font-size: 12px;
+  color: var(--red);
+  min-height: 0;
+  transition: all 0.2s;
+}
+
+.field-error:empty {
+  display: none;
+}
+
+/* ── Settings groups ─────────────────────────────────────────────────── */
+
+.settings-group {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  padding: 10px 12px;
+  background: var(--surface);
+  border-radius: var(--radius);
+  border: 1px solid var(--border);
+}
+
+.group-title {
+  font-size: 11px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.6px;
+  color: var(--accent-light);
+}
+
+.settings-group .field {
+  gap: 4px;
+}
+
+.field input[type="password"] {
+  padding: 8px 12px;
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  background: var(--surface2);
+  color: var(--text);
+  font-size: 13px;
+  font-family: monospace;
+  outline: none;
+  transition: border-color 0.2s;
+  width: 100%;
+}
+
+.field input[type="password"]:focus {
+  border-color: var(--accent);
+}
+
+.btn-tiny {
+  padding: 4px 10px;
+  font-size: 11px;
+  margin-top: 2px;
+}
+
+/* ── Voice tab section headers ───────────────────────────────────────── */
+
+.section-header {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.section-header h3 {
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--text);
+}
+
+.section-tag {
+  font-size: 9px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  padding: 2px 7px;
+  border-radius: 4px;
+}
+
+.section-tag.cloud {
+  background: rgba(108, 92, 231, 0.2);
+  color: var(--accent-light);
+}
+
+.section-tag.local {
+  background: rgba(0, 184, 148, 0.15);
+  color: var(--green);
+}
+
+/* ── ElevenLabs voice list ───────────────────────────────────────────── */
+
+.el-voice-item {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 8px 12px;
+  background: var(--surface);
+  border-radius: 8px;
+  font-size: 12px;
+  margin-top: 4px;
+}
+
+.el-voice-item .el-voice-name {
+  color: var(--text);
+  font-weight: 500;
+}
+
+.el-voice-item .el-voice-cat {
+  font-size: 10px;
+  color: var(--text2);
+  margin-left: 6px;
+}
+
+/* ── Inline record hint ──────────────────────────────────────────────── */
+
+.rec-hint-inline {
+  font-size: 11px;
+  color: var(--text2);
+}
+
+/* ── Correction / glossary ───────────────────────────────────────────── */
+
+.edit-btn {
+  flex-shrink: 0;
+  font-size: 14px;
+  opacity: 0.4;
+  transition: opacity 0.2s;
+}
+
+.edit-btn:hover {
+  opacity: 1;
+  color: var(--accent-light);
+}
+
+.correction-form {
+  padding: 10px 12px;
+  background: var(--surface);
+  border: 1px solid var(--accent);
+  border-radius: var(--radius);
+}
+
+.correction-row {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.correction-row input {
+  flex: 1;
+  padding: 6px 10px;
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  background: var(--surface2);
+  color: var(--text);
+  font-size: 12px;
+  outline: none;
+}
+
+.correction-row input:focus {
+  border-color: var(--accent);
+}
+
+.correction-arrow {
+  color: var(--accent-light);
+  font-size: 14px;
+  flex-shrink: 0;
+}
+
+.correction-actions {
+  display: flex;
+  gap: 8px;
+  margin-top: 8px;
+}
+
+.btn-cancel {
+  background: transparent;
+  border-color: var(--border);
+  color: var(--text2);
+}
+
+.btn-cancel:hover {
+  background: var(--surface2);
+  color: var(--text);
+}
+
+.glossary-details {
+  font-size: 12px;
+  color: var(--text2);
+}
+
+.glossary-details summary {
+  cursor: pointer;
+  padding: 6px 0;
+  user-select: none;
+}
+
+.glossary-details summary:hover {
+  color: var(--text);
+}
+
+.glossary-list {
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+  margin-top: 4px;
+  max-height: 150px;
+  overflow-y: auto;
+}
+
+.glossary-item {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 5px 10px;
+  background: var(--surface);
+  border-radius: 6px;
+  font-size: 11px;
+}
+
+.glossary-item .gl-pair {
+  display: flex;
+  gap: 6px;
+  align-items: center;
+}
+
+.glossary-item .gl-en {
+  color: var(--text2);
+}
+
+.glossary-item .gl-arrow {
+  color: var(--accent-light);
+  font-size: 10px;
+}
+
+.glossary-item .gl-vi {
+  color: var(--text);
+  font-weight: 500;
+}
+
+/* ── API key links ────────────────────────────────────────────────────── */
+
+.api-link {
+  display: inline-block;
+  font-size: 11px;
+  color: var(--accent-light);
+  text-decoration: none;
+  margin-top: 3px;
+  transition: color 0.2s;
+}
+
+.api-link:hover {
+  color: #fff;
+  text-decoration: underline;
+}
+
+.help-text .api-link {
+  margin-top: 6px;
+}
+
+.hidden {
+  display: none !important;
+}

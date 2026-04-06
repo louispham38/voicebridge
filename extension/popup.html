@@ -1,0 +1,236 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>VoiceBridge</title>
+  <link rel="stylesheet" href="popup.css" />
+</head>
+<body>
+  <div class="app">
+    <!-- Header -->
+    <header class="header">
+      <div class="logo">
+        <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M12 1a3 3 0 0 0-3 3v8a3 3 0 0 0 6 0V4a3 3 0 0 0-3-3z"/>
+          <path d="M19 10v2a7 7 0 0 1-14 0v-2"/>
+          <line x1="12" y1="19" x2="12" y2="23"/>
+          <line x1="8" y1="23" x2="16" y2="23"/>
+        </svg>
+        <h1>VoiceBridge</h1>
+      </div>
+      <span class="badge" id="statusBadge">Offline</span>
+    </header>
+
+    <!-- Tabs -->
+    <nav class="tabs">
+      <button class="tab active" data-tab="translate">Dịch</button>
+      <button class="tab" data-tab="voice">Giọng nói</button>
+      <button class="tab" data-tab="settings">Cài đặt</button>
+    </nav>
+
+    <!-- ═══ TAB: Translate ═══ -->
+    <section class="panel" id="panel-translate">
+      <button class="btn-main" id="btnToggle">
+        <svg class="icon-mic" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M12 1a3 3 0 0 0-3 3v8a3 3 0 0 0 6 0V4a3 3 0 0 0-3-3z"/>
+          <path d="M19 10v2a7 7 0 0 1-14 0v-2"/>
+        </svg>
+        <span>Bắt đầu dịch</span>
+      </button>
+
+      <div class="control-row">
+        <label>Âm lượng gốc</label>
+        <input type="range" id="volumeSlider" min="0" max="100" value="15" />
+        <span id="volumeValue">15%</span>
+      </div>
+
+      <div class="live-area">
+        <div class="live-label">EN</div>
+        <div class="live-text" id="liveTranscript">Đang chờ…</div>
+      </div>
+      <div class="live-area accent">
+        <div class="live-label">VI</div>
+        <div class="live-text" id="liveTranslation">Đang chờ…</div>
+        <button class="btn-icon edit-btn" id="btnEditTranslation" title="Sửa bản dịch">&#9998;</button>
+      </div>
+
+      <div class="correction-form hidden" id="correctionForm">
+        <div class="field">
+          <label>Sửa bản dịch</label>
+          <div class="correction-row">
+            <input type="text" id="correctionEn" placeholder="Từ/câu tiếng Anh" />
+            <span class="correction-arrow">&rarr;</span>
+            <input type="text" id="correctionVi" placeholder="Bản dịch đúng (tiếng Việt)" />
+          </div>
+          <div class="correction-actions">
+            <button class="btn-sm" id="btnSaveCorrection">Lưu sửa</button>
+            <button class="btn-sm btn-cancel" id="btnCancelCorrection">Huỷ</button>
+          </div>
+        </div>
+      </div>
+
+      <div class="meta" id="metaTiming"></div>
+
+      <details class="glossary-details">
+        <summary>Từ điển sửa dịch (<span id="glossaryCount">0</span>)</summary>
+        <div class="glossary-list" id="glossaryList"></div>
+      </details>
+    </section>
+
+    <!-- ═══ TAB: Voice training ═══ -->
+    <section class="panel hidden" id="panel-voice">
+      <!-- ElevenLabs Voice Cloning -->
+      <div class="section-header">
+        <span class="section-tag cloud">Cloud</span>
+        <h3>ElevenLabs Voice Cloning</h3>
+      </div>
+      <p class="help-text">
+        Clone giọng nói từ 1 file âm thanh ngắn (~30s). Cần ElevenLabs API key (Starter $5/tháng).
+        Giọng clone sử dụng cloud — không tốn RAM.
+        <br/><a class="api-link" href="https://elevenlabs.io/app/settings/api-keys" target="_blank">Lấy ElevenLabs API Key &rarr;</a>
+      </p>
+      <div class="field">
+        <label>Tên giọng clone</label>
+        <input type="text" id="elCloneName" value="giong-cua-toi" placeholder="vd: giong-cua-toi" />
+      </div>
+      <div class="field">
+        <label>File mẫu giọng (.wav, .mp3)</label>
+        <input type="file" id="elCloneFile" accept=".wav,.mp3,.ogg,.webm" />
+      </div>
+      <div class="record-section">
+        <button class="btn-record" id="btnElRecord">
+          <span class="rec-dot"></span> Thu âm trực tiếp
+        </button>
+        <span class="rec-hint-inline">Hoặc thu âm ~30s rồi clone tự động</span>
+      </div>
+      <button class="btn-sm" id="btnElClone">Tạo giọng clone (từ file)</button>
+      <div class="field-error" id="elCloneStatus"></div>
+
+      <div id="elVoicesList"></div>
+
+      <!-- Local Voice Cloning (Coqui) -->
+      <div class="section-header" style="margin-top:12px">
+        <span class="section-tag local">Local</span>
+        <h3>Coqui Voice Clone (nâng cao)</h3>
+      </div>
+      <p class="help-text">
+        Clone giọng cục bộ bằng XTTS v2. Cần ~4GB RAM, chỉ phù hợp máy mạnh.
+      </p>
+
+      <div class="field">
+        <label>Tên hồ sơ giọng</label>
+        <div class="input-row">
+          <input type="text" id="voiceName" value="giong-cua-toi" placeholder="vd: giong-cua-toi" />
+          <button class="btn-sm" id="btnLoadProfile">Tải</button>
+        </div>
+        <div class="field-error" id="voiceNameError"></div>
+      </div>
+
+      <div class="record-section">
+        <button class="btn-record" id="btnRecord">
+          <span class="rec-dot"></span> Thu âm
+        </button>
+        <span class="rec-timer" id="recTimer">00:00</span>
+      </div>
+      <div class="field-error" id="recordError"></div>
+
+      <div class="field">
+        <label>Hoặc tải file WAV lên</label>
+        <input type="file" id="fileUpload" accept=".wav,.mp3,.ogg,.webm" />
+      </div>
+
+      <div class="samples-list" id="samplesList"></div>
+
+      <h3 class="sub-heading">Hồ sơ giọng local đã lưu</h3>
+      <div class="profiles-list" id="profilesList"></div>
+    </section>
+
+    <!-- ═══ TAB: Settings ═══ -->
+    <section class="panel hidden" id="panel-settings">
+      <div class="field">
+        <label>Backend URL</label>
+        <input type="text" id="backendUrl" placeholder="http://localhost:8765" />
+      </div>
+
+      <div class="settings-group">
+        <div class="group-title">Nhận dạng giọng nói (STT)</div>
+        <div class="field">
+          <label>Provider</label>
+          <select id="sttProvider">
+            <option value="local">Local (Whisper — miễn phí, tốn RAM)</option>
+            <option value="openai">Cloud (OpenAI Whisper API — nhanh)</option>
+          </select>
+        </div>
+      </div>
+
+      <div class="settings-group">
+        <div class="group-title">Giọng nói dịch (TTS)</div>
+        <div class="field">
+          <label>Provider</label>
+          <select id="ttsProvider">
+            <option value="edge-tts">edge-tts (miễn phí, Microsoft)</option>
+            <option value="openai">OpenAI TTS (cloud, tự nhiên)</option>
+            <option value="elevenlabs">ElevenLabs (cloud, voice clone)</option>
+            <option value="coqui">Coqui XTTS (local, tốn RAM)</option>
+          </select>
+        </div>
+        <div class="field" id="fieldEdgeVoice">
+          <label>Giọng edge-tts</label>
+          <select id="defaultVoice">
+            <option value="vi-VN-HoaiMyNeural">HoaiMy (Nữ)</option>
+            <option value="vi-VN-NamMinhNeural">NamMinh (Nam)</option>
+          </select>
+        </div>
+        <div class="field hidden" id="fieldOpenaiVoice">
+          <label>Giọng OpenAI</label>
+          <select id="openaiVoice">
+            <option value="nova">Nova (nữ, rõ ràng)</option>
+            <option value="alloy">Alloy (trung tính)</option>
+            <option value="echo">Echo (nam)</option>
+            <option value="fable">Fable (nam, ấm)</option>
+            <option value="onyx">Onyx (nam, trầm)</option>
+            <option value="shimmer">Shimmer (nữ, nhẹ)</option>
+            <option value="ash">Ash</option>
+            <option value="coral">Coral</option>
+            <option value="sage">Sage</option>
+          </select>
+        </div>
+        <div class="field hidden" id="fieldElVoice">
+          <label>Giọng ElevenLabs</label>
+          <select id="elevenlabsVoice">
+            <option value="">— Chọn giọng —</option>
+          </select>
+          <button class="btn-sm btn-tiny" id="btnRefreshElVoices">Làm mới danh sách</button>
+        </div>
+        <div class="field hidden" id="fieldCoquiProfile">
+          <label>Hồ sơ Coqui</label>
+          <select id="voiceProfileSelect">
+            <option value="">— Không dùng —</option>
+          </select>
+        </div>
+      </div>
+
+      <div class="settings-group">
+        <div class="group-title">API Keys</div>
+        <div class="field hidden" id="fieldOpenaiKey">
+          <label>OpenAI API Key</label>
+          <input type="password" id="openaiApiKey" placeholder="sk-..." />
+          <a class="api-link" href="https://platform.openai.com/api-keys" target="_blank">Lấy OpenAI API Key &rarr;</a>
+        </div>
+        <div class="field hidden" id="fieldElKey">
+          <label>ElevenLabs API Key</label>
+          <input type="password" id="elevenlabsApiKey" placeholder="xi-..." />
+          <a class="api-link" href="https://elevenlabs.io/app/settings/api-keys" target="_blank">Lấy ElevenLabs API Key &rarr;</a>
+        </div>
+        <div class="meta" id="apiKeyHint"></div>
+      </div>
+
+      <button class="btn-sm" id="btnSaveSettings">Lưu cài đặt</button>
+      <div class="meta" id="settingsMsg"></div>
+    </section>
+  </div>
+
+  <script src="popup.js"></script>
+</body>
+</html>

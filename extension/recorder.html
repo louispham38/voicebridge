@@ -1,0 +1,151 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+  <meta charset="UTF-8" />
+  <title>VoiceBridge – Thu âm giọng nói</title>
+  <style>
+    :root {
+      --bg: #0f1117;
+      --surface: #1a1d27;
+      --border: #2e3348;
+      --text: #e4e6f0;
+      --text2: #8b90a5;
+      --accent: #6c5ce7;
+      --accent-light: #a29bfe;
+      --green: #00b894;
+      --red: #e17055;
+    }
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body {
+      background: var(--bg);
+      color: var(--text);
+      font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
+      font-size: 14px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      min-height: 100vh;
+      padding: 24px;
+    }
+    .card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 16px;
+      padding: 32px;
+      width: 100%;
+      max-width: 380px;
+      text-align: center;
+    }
+    h2 {
+      font-size: 18px;
+      font-weight: 700;
+      margin-bottom: 6px;
+      color: var(--accent-light);
+    }
+    .subtitle {
+      font-size: 13px;
+      color: var(--text2);
+      margin-bottom: 24px;
+    }
+    .profile-name {
+      font-size: 13px;
+      color: var(--accent-light);
+      background: rgba(108,92,231,0.12);
+      padding: 6px 14px;
+      border-radius: 8px;
+      display: inline-block;
+      margin-bottom: 20px;
+    }
+    .timer {
+      font-size: 48px;
+      font-weight: 200;
+      font-variant-numeric: tabular-nums;
+      color: var(--text);
+      margin: 16px 0;
+      letter-spacing: 2px;
+    }
+    .btn-record {
+      width: 80px;
+      height: 80px;
+      border-radius: 50%;
+      border: 3px solid var(--red);
+      background: transparent;
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      transition: all 0.2s;
+      margin: 12px 0;
+    }
+    .btn-record:hover {
+      background: rgba(225,112,85,0.1);
+    }
+    .btn-record .inner {
+      width: 32px;
+      height: 32px;
+      border-radius: 50%;
+      background: var(--red);
+      transition: all 0.2s;
+    }
+    .btn-record.recording .inner {
+      border-radius: 6px;
+      width: 24px;
+      height: 24px;
+    }
+    .btn-record.recording {
+      border-color: var(--red);
+      animation: pulse 1.5s infinite;
+    }
+    @keyframes pulse {
+      0%, 100% { box-shadow: 0 0 0 0 rgba(225,112,85,0.3); }
+      50% { box-shadow: 0 0 0 12px rgba(225,112,85,0); }
+    }
+    .hint {
+      font-size: 13px;
+      color: var(--text2);
+      margin-top: 8px;
+    }
+    .status {
+      font-size: 13px;
+      margin-top: 16px;
+      min-height: 20px;
+    }
+    .status.error { color: var(--red); }
+    .status.success { color: var(--green); }
+    .status.info { color: var(--accent-light); }
+    .visualizer {
+      height: 40px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 3px;
+      margin: 8px 0;
+    }
+    .bar {
+      width: 4px;
+      background: var(--accent);
+      border-radius: 2px;
+      transition: height 0.05s;
+    }
+  </style>
+</head>
+<body>
+  <div class="card">
+    <h2>Thu âm giọng nói</h2>
+    <p class="subtitle">Đọc một đoạn tiếng Việt rõ ràng (10–30 giây)</p>
+    <div class="profile-name" id="profileName"></div>
+
+    <div class="visualizer" id="visualizer"></div>
+    <div class="timer" id="timer">00:00</div>
+
+    <button class="btn-record" id="btnRecord">
+      <div class="inner"></div>
+    </button>
+    <div class="hint" id="hint">Nhấn để bắt đầu thu âm</div>
+
+    <div class="status" id="status"></div>
+  </div>
+
+  <script src="recorder.js"></script>
+</body>
+</html>
