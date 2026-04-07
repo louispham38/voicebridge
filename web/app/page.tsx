@@ -345,7 +345,7 @@ function Pricing() {
               ))}
             </ul>
             <Link
-              href="/dashboard"
+              href="/login"
               className="mt-8 block text-center bg-gradient-to-r from-[#6c5ce7] to-[#8b5cf6] text-white text-sm font-semibold py-3 rounded-full shadow-lg shadow-[#6c5ce7]/20 hover:from-[#5a4bd6] hover:to-[#7c4ddb] transition-all"
             >
               Bắt đầu dùng Pro

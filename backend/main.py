@@ -703,6 +703,43 @@ async def elevenlabs_delete_voice(voice_id: str, api_key: str):
 
 
 # ---------------------------------------------------------------------------
+# REST – Subscription verification (checks Supabase)
+# ---------------------------------------------------------------------------
+
+SUPABASE_URL = os.getenv("SUPABASE_URL", "")
+SUPABASE_SERVICE_KEY = os.getenv("SUPABASE_SERVICE_ROLE_KEY", "")
+
+
+async def _check_pro(user_id: str) -> bool:
+    """Check if a user has an active Pro subscription via Supabase."""
+    if not SUPABASE_URL or not SUPABASE_SERVICE_KEY or not user_id:
+        return False
+    httpx = _get_httpx()
+    try:
+        async with httpx.AsyncClient(timeout=10) as client:
+            resp = await client.get(
+                f"{SUPABASE_URL}/rest/v1/subscriptions"
+                f"?user_id=eq.{user_id}&plan=eq.pro&status=eq.active&select=id",
+                headers={
+                    "apikey": SUPABASE_SERVICE_KEY,
+                    "Authorization": f"Bearer {SUPABASE_SERVICE_KEY}",
+                },
+            )
+            return resp.status_code == 200 and len(resp.json()) > 0
+    except Exception as e:
+        print(f"[VoiceBridge] Subscription check error: {e}")
+        return False
+
+
+@app.get("/api/verify-subscription")
+async def verify_subscription(user_id: str = ""):
+    if not user_id:
+        return {"plan": "free", "pro": False}
+    is_pro = await _check_pro(user_id)
+    return {"plan": "pro" if is_pro else "free", "pro": is_pro}
+
+
+# ---------------------------------------------------------------------------
 # Entry point
 # ---------------------------------------------------------------------------
 
