@@ -1,9 +1,10 @@
 import { NextResponse } from "next/server";
-import { stripe } from "@/lib/stripe";
+import { getStripe } from "@/lib/stripe";
 import { createClient } from "@/lib/supabase-server";
 
 export async function POST() {
   try {
+    const stripe = getStripe();
     const supabase = await createClient();
     const {
       data: { user },
@@ -36,12 +37,15 @@ export async function POST() {
       });
     }
 
+    const siteUrl =
+      process.env.NEXT_PUBLIC_SITE_URL || "https://web-nine-orpin-26.vercel.app";
+
     const session = await stripe.checkout.sessions.create({
       customer: customerId,
       mode: "subscription",
       line_items: [{ price: process.env.STRIPE_PRICE_ID!, quantity: 1 }],
-      success_url: `${process.env.NEXT_PUBLIC_SITE_URL || "https://web-nine-orpin-26.vercel.app"}/dashboard?upgraded=true`,
-      cancel_url: `${process.env.NEXT_PUBLIC_SITE_URL || "https://web-nine-orpin-26.vercel.app"}/dashboard`,
+      success_url: `${siteUrl}/dashboard?upgraded=true`,
+      cancel_url: `${siteUrl}/dashboard`,
       subscription_data: {
         metadata: { supabase_user_id: user.id },
       },

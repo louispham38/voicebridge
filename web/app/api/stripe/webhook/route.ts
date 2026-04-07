@@ -1,12 +1,14 @@
 import { NextRequest, NextResponse } from "next/server";
-import { stripe } from "@/lib/stripe";
+import { getStripe } from "@/lib/stripe";
 import { createClient } from "@supabase/supabase-js";
 import Stripe from "stripe";
 
-const supabaseAdmin = createClient(
-  process.env.NEXT_PUBLIC_SUPABASE_URL!,
-  process.env.SUPABASE_SERVICE_ROLE_KEY!
-);
+function getSupabaseAdmin() {
+  return createClient(
+    process.env.NEXT_PUBLIC_SUPABASE_URL!,
+    process.env.SUPABASE_SERVICE_ROLE_KEY!
+  );
+}
 
 export async function POST(req: NextRequest) {
   const body = await req.text();
@@ -14,6 +16,7 @@ export async function POST(req: NextRequest) {
 
   let event: Stripe.Event;
   try {
+    const stripe = getStripe();
     event = stripe.webhooks.constructEvent(
       body,
       sig,
@@ -24,6 +27,9 @@ export async function POST(req: NextRequest) {
     console.error("[Stripe Webhook] Signature verification failed:", message);
     return NextResponse.json({ error: message }, { status: 400 });
   }
+
+  const stripe = getStripe();
+  const supabaseAdmin = getSupabaseAdmin();
 
   switch (event.type) {
     case "checkout.session.completed": {
