@@ -13,7 +13,7 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "VoiceBridge — Real-time Voice Translation & Dubbing",
+  title: "VoiceBridge — Dịch giọng nói Real-time",
   description:
     "Dịch real-time tiếng Anh → tiếng Việt bằng giọng nói. Hỗ trợ voice cloning, Zoom, YouTube, Google Meet. Miễn phí.",
   keywords: [
