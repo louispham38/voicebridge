@@ -1,0 +1,19 @@
+services:
+  - type: web
+    name: voicebridge-backend
+    runtime: python
+    region: singapore
+    rootDir: backend
+    buildCommand: pip install -r requirements.txt
+    startCommand: uvicorn main:app --host 0.0.0.0 --port $PORT
+    envVars:
+      - key: PYTHON_VERSION
+        value: 3.11.9
+      - key: CORS_ORIGINS
+        value: https://web-nine-orpin-26.vercel.app,http://localhost:3000
+      - key: WHISPER_MODEL
+        value: base
+      - key: EDGE_TTS_VOICE
+        value: vi-VN-HoaiMyNeural
+    healthCheckPath: /api/health
+    plan: free

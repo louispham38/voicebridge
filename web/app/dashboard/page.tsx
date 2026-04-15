@@ -43,14 +43,23 @@ export default function DashboardPage() {
   useEffect(() => {
     supabase.auth.getUser().then(({ data }) => setUser(data.user));
     loadCorrections();
-    fetch("/api/subscription")
-      .then((r) => r.json())
-      .then((d) => setSub(d))
-      .catch(() => {});
 
-    if (new URLSearchParams(window.location.search).get("upgraded") === "true") {
-      setSub({ plan: "pro", status: "active" });
+    const upgraded =
+      new URLSearchParams(window.location.search).get("upgraded") === "true";
+
+    if (upgraded) {
       window.history.replaceState({}, "", "/dashboard");
+      fetch("/api/stripe/sync", { method: "POST" })
+        .then((r) => r.json())
+        .then((d) => {
+          if (d.plan) setSub(d);
+        })
+        .catch(() => setSub({ plan: "pro", status: "active" }));
+    } else {
+      fetch("/api/subscription")
+        .then((r) => r.json())
+        .then((d) => setSub(d))
+        .catch(() => {});
     }
   }, [supabase, loadCorrections]);
 

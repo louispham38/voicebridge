@@ -10,7 +10,9 @@
  */
 
 (() => {
-  if (window.__voiceBridgeInjected) return;
+  // Remove any leftover panels from previous injection / extension reload
+  document.querySelectorAll("#vb-panel").forEach((el) => el.remove());
+  document.querySelectorAll("style[data-vb]").forEach((el) => el.remove());
   window.__voiceBridgeInjected = true;
 
   let isPaused = false;
@@ -43,7 +45,7 @@
           <button id="vb-btn-edit" title="Sửa bản dịch">✎</button>
         </div>
       </div>
-      <div id="vb-edit-area" style="display:none"
+      <div id="vb-edit-area" style="display:none">
         <div class="vb-edit-row">
           <input id="vb-edit-en" placeholder="Tiếng Anh gốc" />
           <span class="vb-arrow">→</span>
@@ -67,6 +69,7 @@
   `;
 
   const style = document.createElement("style");
+  style.setAttribute("data-vb", "1");
   style.textContent = `
     #vb-panel {
       position: fixed;
@@ -272,25 +275,31 @@
 
   handle.addEventListener("mousedown", (e) => {
     if (e.target.tagName === "BUTTON") return;
+    e.preventDefault();
+    e.stopPropagation();
     dragging = true;
     const rect = panel.getBoundingClientRect();
     dx = e.clientX - rect.left;
     dy = e.clientY - rect.top;
     panel.style.transition = "none";
-  });
+  }, true);
 
   document.addEventListener("mousemove", (e) => {
     if (!dragging) return;
+    e.preventDefault();
+    e.stopPropagation();
     panel.style.left = (e.clientX - dx) + "px";
     panel.style.top = (e.clientY - dy) + "px";
     panel.style.right = "auto";
     panel.style.bottom = "auto";
-  });
+  }, true);
 
-  document.addEventListener("mouseup", () => {
+  document.addEventListener("mouseup", (e) => {
+    if (!dragging) return;
+    e.stopPropagation();
     dragging = false;
     panel.style.transition = "";
-  });
+  }, true);
 
   // ── Subtitle display ──────────────────────────────────────────────────
 
@@ -311,6 +320,12 @@
 
   // ── Pause / Resume ────────────────────────────────────────────────────
 
+  function safeSendMessage(msg) {
+    try {
+      chrome.runtime.sendMessage(msg).catch(() => {});
+    } catch (_) {}
+  }
+
   function togglePause() {
     isPaused = !isPaused;
     btnPause.textContent = isPaused ? "▶" : "⏸";
@@ -323,14 +338,14 @@
       else el.play().catch(() => {});
     });
 
-    chrome.runtime.sendMessage({
+    safeSendMessage({
       target: "background",
       type: isPaused ? "pause-translation" : "resume-translation",
-    }).catch(() => {});
+    });
   }
 
   function stopTranslation() {
-    chrome.runtime.sendMessage({ target: "background", type: "stop" }).catch(() => {});
+    safeSendMessage({ target: "background", type: "stop" });
     cleanup();
   }
 
@@ -389,11 +404,11 @@
     const val = parseInt(volumeSlider.value);
     volVal.textContent = val + "%";
     setMediaVolume(val / 100);
-    chrome.runtime.sendMessage({
+    safeSendMessage({
       target: "content",
       type: "set-volume",
       level: val / 100,
-    }).catch(() => {});
+    });
   });
 
   // ── Button handlers ───────────────────────────────────────────────────
