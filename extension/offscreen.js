@@ -97,7 +97,7 @@ let wsReconnectTimer = null;
 
 function connectWS(config) {
   wsConfig = config || wsConfig;
-  const url = wsConfig?.backendUrl || "ws://localhost:8765/ws/translate";
+  const url = wsConfig?.backendUrl || "wss://voicebridge-backend-01q1.onrender.com/ws/translate";
 
   if (wsReconnectTimer) {
     clearTimeout(wsReconnectTimer);

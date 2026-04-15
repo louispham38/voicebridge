@@ -383,7 +383,7 @@
       const form = new FormData();
       form.append("en", en);
       form.append("vi", vi);
-      const backendHttp = window.__vbBackendHttp || "http://localhost:8765";
+      const backendHttp = window.__vbBackendHttp || "https://voicebridge-backend-01q1.onrender.com";
       await fetch(`${backendHttp}/api/corrections`, { method: "POST", body: form });
       translationEl.textContent = vi;
       closeEdit();

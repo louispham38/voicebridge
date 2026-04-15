@@ -62,7 +62,7 @@ async function startCapture(tabId, config) {
         target: { tabId },
         files: ["content.js"],
       });
-      const backendHttp = (config?.backendUrl || "ws://localhost:8765/ws/translate")
+      const backendHttp = (config?.backendUrl || "wss://voicebridge-backend-01q1.onrender.com/ws/translate")
         .replace("ws://", "http://").replace("wss://", "https://").replace("/ws/translate", "");
       chrome.tabs.sendMessage(tabId, { type: "vb-set-backend", backendHttp }).catch(() => {});
     } catch (e) {

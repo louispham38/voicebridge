@@ -11,7 +11,7 @@
 
 const params = new URLSearchParams(location.search);
 const voiceName = params.get("name") || "my-voice";
-const backendHttp = params.get("backend") || "http://localhost:8765";
+const backendHttp = params.get("backend") || "https://voicebridge-backend-01q1.onrender.com";
 const mode = params.get("mode") || "local";
 const elApiKey = params.get("elkey") || "";
 

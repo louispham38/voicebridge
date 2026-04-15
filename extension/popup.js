@@ -10,8 +10,8 @@
 
 let isCapturing = false;
 let settings = {
-  backendUrl: "ws://localhost:8765/ws/translate",
-  backendHttp: "http://localhost:8765",
+  backendUrl: "wss://voicebridge-backend-01q1.onrender.com/ws/translate",
+  backendHttp: "https://voicebridge-backend-01q1.onrender.com",
   defaultVoice: "vi-VN-HoaiMyNeural",
   sttProvider: "local",
   ttsProvider: "edge-tts",
@@ -97,7 +97,7 @@ async function saveSettings() {
 }
 
 function populateUI() {
-  backendUrlInput.value = settings.backendHttp || "http://localhost:8765";
+  backendUrlInput.value = settings.backendHttp || "https://voicebridge-backend-01q1.onrender.com";
   sttProviderSel.value = settings.sttProvider;
   ttsProviderSel.value = settings.ttsProvider;
   defaultVoiceSelect.value = settings.defaultVoice;
