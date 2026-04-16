@@ -20,12 +20,15 @@ const audioQueue = [];
 let isPlaying = false;
 let playbackCtx = null;
 
+// NOTE: playbackCtx is created eagerly in startCapture() while the
+// tabCapture user-gesture context is still active, so Chrome's AutoPlay
+// Policy never blocks it.  ensurePlaybackCtx() is only a safety net.
 async function ensurePlaybackCtx() {
   if (!playbackCtx || playbackCtx.state === "closed") {
     playbackCtx = new AudioContext();
   }
   if (playbackCtx.state === "suspended") {
-    await playbackCtx.resume();
+    try { await playbackCtx.resume(); } catch (_) {}
   }
   return playbackCtx;
 }
@@ -94,6 +97,7 @@ function float32ToInt16(float32) {
 
 let wsConfig = null;
 let wsReconnectTimer = null;
+let wsPingInterval = null;
 
 function connectWS(config) {
   wsConfig = config || wsConfig;
@@ -102,6 +106,10 @@ function connectWS(config) {
   if (wsReconnectTimer) {
     clearTimeout(wsReconnectTimer);
     wsReconnectTimer = null;
+  }
+  if (wsPingInterval) {
+    clearInterval(wsPingInterval);
+    wsPingInterval = null;
   }
 
   try {
@@ -126,6 +134,12 @@ function connectWS(config) {
       }
       ws.send(JSON.stringify(configMsg));
     }
+    // Keepalive ping every 25s to prevent Render/proxy idle timeout
+    wsPingInterval = setInterval(() => {
+      if (ws && ws.readyState === WebSocket.OPEN) {
+        ws.send(JSON.stringify({ type: "ping" }));
+      }
+    }, 25000);
   };
 
   ws.onmessage = (evt) => {
@@ -147,6 +161,7 @@ function connectWS(config) {
   };
 
   ws.onclose = (e) => {
+    if (wsPingInterval) { clearInterval(wsPingInterval); wsPingInterval = null; }
     relay({ type: "status", message: "Disconnected from backend" });
     if (mediaStream) {
       scheduleReconnect();
@@ -214,6 +229,15 @@ async function startCapture(streamId, config) {
 
     audioCtx = new AudioContext();
     nativeSampleRate = audioCtx.sampleRate;
+
+    // Create playbackCtx here, while we still have the tabCapture user-gesture
+    // context active — this ensures Chrome's AutoPlay Policy never suspends it.
+    if (!playbackCtx || playbackCtx.state === "closed") {
+      playbackCtx = new AudioContext();
+    }
+    if (playbackCtx.state === "suspended") {
+      try { await playbackCtx.resume(); } catch (_) {}
+    }
     samplesPerChunk = Math.floor(nativeSampleRate * 0.3); // ~300ms chunks
     chunkBuffer = new Float32Array(0);
 
@@ -247,28 +271,15 @@ async function startCapture(streamId, config) {
 }
 
 function stopCapture() {
-  if (wsReconnectTimer) {
-    clearTimeout(wsReconnectTimer);
-    wsReconnectTimer = null;
-  }
-  if (processorNode) {
-    processorNode.disconnect();
-    processorNode = null;
-  }
-  if (audioCtx) {
-    audioCtx.close().catch(() => {});
-    audioCtx = null;
-  }
-  if (mediaStream) {
-    mediaStream.getTracks().forEach((t) => t.stop());
-    mediaStream = null;
-  }
-  if (ws) {
-    ws.close();
-    ws = null;
-  }
+  if (wsReconnectTimer) { clearTimeout(wsReconnectTimer); wsReconnectTimer = null; }
+  if (wsPingInterval) { clearInterval(wsPingInterval); wsPingInterval = null; }
+  if (processorNode) { processorNode.disconnect(); processorNode = null; }
+  if (audioCtx) { audioCtx.close().catch(() => {}); audioCtx = null; }
+  if (mediaStream) { mediaStream.getTracks().forEach((t) => t.stop()); mediaStream = null; }
+  if (ws) { ws.close(); ws = null; }
   audioQueue.length = 0;
   isPlaying = false;
+  // Keep playbackCtx alive so pending audio can still drain
 }
 
 // ── Microphone recording (for voice cloning samples) ────────────────────

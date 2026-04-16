@@ -734,4 +734,9 @@ function handleSaveSettings() {
   setTimeout(() => (settingsMsg.textContent = ""), 2000);
 
   checkBackendHealth();
+
+  // Auto-refresh ElevenLabs voices if ElevenLabs TTS is selected and key is present
+  if (settings.ttsProvider === "elevenlabs" && settings.elevenlabsApiKey) {
+    loadElVoices();
+  }
 }
