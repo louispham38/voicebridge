@@ -145,7 +145,7 @@ function toggleField(id, show) {
 
 async function checkBackendHealth() {
   try {
-    const res = await fetch(`${settings.backendHttp}/api/health`, { signal: AbortSignal.timeout(3000) });
+    const res = await fetch(`${settings.backendHttp}/api/health`, { signal: AbortSignal.timeout(5000) });
     if (res.ok) {
       const data = await res.json();
       if (!isCapturing) {
@@ -234,13 +234,29 @@ async function toggleCapture() {
     return;
   }
 
-  try {
-    const healthRes = await fetch(`${settings.backendHttp}/api/health`, { signal: AbortSignal.timeout(2000) });
-    if (!healthRes.ok) throw new Error("not ok");
-  } catch (_) {
+  // Try health check — Render free tier may need up to 60s to cold-start
+  statusBadge.textContent = "Đang kết nối…";
+  statusBadge.className = "badge";
+  metaTiming.textContent = "Đang kiểm tra server…";
+  metaTiming.style.color = "";
+
+  let healthOk = false;
+  for (let attempt = 1; attempt <= 4; attempt++) {
+    try {
+      const healthRes = await fetch(`${settings.backendHttp}/api/health`, { signal: AbortSignal.timeout(15000) });
+      if (healthRes.ok) { healthOk = true; break; }
+    } catch (_) {}
+    if (attempt < 4) {
+      statusBadge.textContent = `Khởi động server… (${attempt}/4)`;
+      metaTiming.textContent = "Render free tier đang khởi động, vui lòng đợi…";
+      await new Promise((r) => setTimeout(r, 3000));
+    }
+  }
+
+  if (!healthOk) {
     statusBadge.textContent = "Server OFF";
     statusBadge.className = "badge";
-    metaTiming.textContent = "Cần chạy backend trước: cd backend && python main.py";
+    metaTiming.textContent = "Không kết nối được backend. Kiểm tra URL trong Cài đặt.";
     metaTiming.style.color = "#e17055";
     return;
   }

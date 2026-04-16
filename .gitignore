@@ -27,7 +27,7 @@ Thumbs.db
 .idea/
 
 # Build artifacts
-web/public/release/*.zip
 *.zip
+!web/public/release/voicebridge-latest.zip
 dist/
 build/

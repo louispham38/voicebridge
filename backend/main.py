@@ -258,7 +258,7 @@ async def transcribe_local(pcm_bytes: bytes) -> str:
     model = get_whisper()
     np = _numpy()
     if model is None or np is None:
-        return "[Error: Local Whisper not available on this server – switch STT to OpenAI]"
+        return "[Error: Local Whisper chưa cài trên server này. Vào tab Cài đặt → STT Provider → chọn OpenAI và nhập API key.]"
     audio = np.frombuffer(pcm_bytes, dtype=np.int16).astype(np.float32) / 32768.0
     if len(audio) < SAMPLE_RATE * 0.3:
         return ""
@@ -494,6 +494,9 @@ async def ws_translate(ws: WebSocket):
 
                 text = await transcribe(utterance, cfg)
                 if not text:
+                    continue
+                if text.startswith("[Error:"):
+                    await ws.send_json({"type": "error", "message": text[7:].rstrip("]").strip()})
                     continue
                 await ws.send_json({"type": "transcript", "text": text})
 
